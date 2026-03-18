@@ -839,6 +839,22 @@ header {
   color: var(--text3);
   margin-top: 1px;
 }
+.priority-select {
+  margin-top: 5px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 3px 6px;
+  outline: none;
+  font-family: var(--sans);
+  cursor: pointer;
+}
+.priority-select:hover {
+  border-color: var(--text3);
+  color: var(--text2);
+}
 .priority-toggle {
   display: flex;
   align-items: center;

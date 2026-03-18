@@ -1212,11 +1212,25 @@ function showToast(msg, type = "success") {
 const OPTIMIZER_CRITERIA = [
   { id: 'freeDays',     label: 'Meiste freie Tage',        icon: '📅', desc: 'Tage ohne VL (HÜ/GÜ zählen als frei)' },
   { id: 'leastGaps',    label: 'Wenigste Leerzeit',         icon: '⏱️', desc: 'Lücken zwischen Veranstaltungen minimieren' },
-  { id: 'latestStart',  label: 'Spätester Tagesbeginn',     icon: '🌅', desc: 'Möglichst spät am Tag beginnen' },
-  { id: 'earliestEnd',  label: 'Frühestes Tagesende',       icon: '🌙', desc: 'Möglichst früh am Tag fertig sein' },
+  { id: 'startOfDay',   label: 'Tagesbeginn',               icon: '🌅', desc: 'Wann der Tag beginnen soll',
+    options: [
+      { val: 'late',  text: 'Spät (Ausschlafen)' },
+      { val: 'early', text: 'Früh' }
+    ]
+  },
+  { id: 'endOfDay',     label: 'Tagesende',                 icon: '🌙', desc: 'Wann der Tag enden soll',
+    options: [
+      { val: 'early', text: 'Früh (Feierabend)' },
+      { val: 'late',  text: 'Spät' }
+    ]
+  },
 ];
 
-let optimizerPriorities = OPTIMIZER_CRITERIA.map(c => ({ id: c.id, enabled: true }));
+let optimizerPriorities = OPTIMIZER_CRITERIA.map(c => ({ 
+  id: c.id, 
+  enabled: true, 
+  option: c.options ? c.options[0].val : null 
+}));
 let optimizerResult = null;
 
 function loadOptimizerPriorities() {
@@ -1231,6 +1245,15 @@ function loadOptimizerPriorities() {
         } else {
           optimizerPriorities = arr;
         }
+        
+        // Migrate latestStart/earliestEnd to new model
+        optimizerPriorities = optimizerPriorities.map(p => {
+          if (p.id === 'latestStart') { p.id = 'startOfDay'; p.option = 'late'; }
+          if (p.id === 'earliestEnd') { p.id = 'endOfDay'; p.option = 'early'; }
+          if (p.id === 'startOfDay' && !p.option) p.option = 'late';
+          if (p.id === 'endOfDay' && !p.option) p.option = 'early';
+          return p;
+        });
       }
     }
   } catch(e) {}
@@ -1245,6 +1268,14 @@ function togglePriority(id) {
     p.enabled = !p.enabled;
     saveOptimizerPriorities();
     renderPriorityList();
+  }
+}
+
+function changePriorityOption(id, val) {
+  const p = optimizerPriorities.find(p => p.id === id);
+  if (p) {
+    p.option = val;
+    saveOptimizerPriorities();
   }
 }
 
@@ -1491,11 +1522,19 @@ function optimizePlan() {
         case 'leastGaps':
           norm = maxGaps > 0 ? (1 - (s.score.totalGaps / maxGaps)) : 1;
           break;
-        case 'latestStart':
-          norm = (maxStart > minStart) ? ((s.score.avgStart - minStart) / (maxStart - minStart)) : 1;
+        case 'startOfDay':
+          if (critObj.option === 'late') {
+            norm = (maxStart > minStart) ? ((s.score.avgStart - minStart) / (maxStart - minStart)) : 1;
+          } else {
+            norm = (maxStart > minStart) ? (1 - ((s.score.avgStart - minStart) / (maxStart - minStart))) : 1;
+          }
           break;
-        case 'earliestEnd':
-          norm = (maxEnd > minEnd) ? (1 - ((s.score.avgEnd - minEnd) / (maxEnd - minEnd))) : 1;
+        case 'endOfDay':
+          if (critObj.option === 'early') {
+            norm = (maxEnd > minEnd) ? (1 - ((s.score.avgEnd - minEnd) / (maxEnd - minEnd))) : 1;
+          } else {
+            norm = (maxEnd > minEnd) ? ((s.score.avgEnd - minEnd) / (maxEnd - minEnd)) : 1;
+          }
           break;
       }
       totalScore += norm * weight;
@@ -1517,8 +1556,14 @@ function optimizePlan() {
     const bestSwapped = sortedBySwapped.find(s => s.combo !== bestNormal.combo);
     
     if (bestSwapped) {
-      const label1 = OPTIMIZER_CRITERIA.find(c => c.id === enabledPrios[0].id)?.label;
-      const label2 = OPTIMIZER_CRITERIA.find(c => c.id === enabledPrios[1].id)?.label;
+      const getLabel = (critObj) => {
+        const c = OPTIMIZER_CRITERIA.find(c => c.id === critObj.id);
+        if (!c || !c.options) return c?.label;
+        const opt = c.options.find(o => o.val === critObj.option);
+        return `${c.label} (${opt ? opt.text : ''})`;
+      };
+      const label1 = getLabel(enabledPrios[0]);
+      const label2 = getLabel(enabledPrios[1]);
       const variantEntry = {
         ...bestSwapped,
         isSwappedVariant: true,
@@ -1591,6 +1636,11 @@ function renderPriorityList() {
       <div class="priority-info">
         <div class="priority-label">${crit.label}</div>
         <div class="priority-desc">${crit.desc}</div>
+        ${crit.options ? `
+          <select class="priority-select" onchange="changePriorityOption('${critId}', this.value)" onclick="event.stopPropagation()">
+            ${crit.options.map(o => `<option value="${o.val}" ${critObj.option === o.val ? 'selected' : ''}>${o.text}</option>`).join('')}
+          </select>
+        ` : ''}
       </div>
       <div class="priority-toggle">
         <label class="toggle-switch">
