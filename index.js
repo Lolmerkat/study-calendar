@@ -1367,20 +1367,23 @@ function scoreCombination(combo) {
     }
   }
 
-  // 1) Free days: a day is free if it has 0 mandatory events
+  // 1) Free days
   let freeDays = 0;
   for (const d of DAYS) {
-    const mandatory = daySchedule[d].filter(ev => {
-      // It is optional (HÜ/GÜ do not count)
-      if (isOptionalLv(ev.name)) return false;
-      // It is a short lecture (< 60 mins) shouldn't ruin a free day
-      if (ev.end - ev.start < 60) return false;
-      // It is a lecture for a module that meets on multiple days
-      if (ev.modName && moduleDays[ev.modName] > 1) return false;
+    const vls = daySchedule[d].filter(ev => !isOptionalLv(ev.name));
+    
+    if (vls.length === 0) {
+      freeDays++; // No mandatory events
+    } else if (vls.length === 1) {
+      const vl = vls[0];
+      const duration = vl.end - vl.start;
+      const occursMultipleTimes = vl.modName && moduleDays[vl.modName] > 1;
       
-      return true; // This event ruins the free day
-    });
-    if (mandatory.length === 0) freeDays++;
+      // If the only VL is <= 45 mins AND its module occurs on multiple days, it's still "free"
+      if (duration <= 45 && occursMultipleTimes) {
+        freeDays++;
+      }
+    }
   }
 
   // 2) Wasted time (total gaps between consecutive events per day)
@@ -1458,11 +1461,28 @@ function optimizePlan() {
   }
 
   // Calculate exponential weighted score
+  const enabledPrios = optimizerPriorities.filter(p => p.enabled);
+  const canSwap = enabledPrios.length >= 2;
+
   scored.forEach(s => {
     let totalScore = 0;
+    let swappedScore = 0;
+
     optimizerPriorities.forEach((critObj, idx) => {
       if (!critObj.enabled) return;
       const weight = Math.pow(2, optimizerPriorities.length - idx); 
+      
+      let swappedWeight = weight;
+      if (canSwap) {
+        if (critObj.id === enabledPrios[0].id) {
+          const secondIdx = optimizerPriorities.indexOf(enabledPrios[1]);
+          swappedWeight = Math.pow(2, optimizerPriorities.length - secondIdx);
+        } else if (critObj.id === enabledPrios[1].id) {
+          const firstIdx = optimizerPriorities.indexOf(enabledPrios[0]);
+          swappedWeight = Math.pow(2, optimizerPriorities.length - firstIdx);
+        }
+      }
+
       let norm = 0;
       switch (critObj.id) {
         case 'freeDays':
@@ -1479,8 +1499,10 @@ function optimizePlan() {
           break;
       }
       totalScore += norm * weight;
+      swappedScore += norm * swappedWeight;
     });
     s.totalWeightedScore = totalScore;
+    s.swappedScore = swappedScore;
   });
 
   // Sort by weighted score descending
@@ -1488,6 +1510,26 @@ function optimizePlan() {
 
   // Return top 3 (or fewer if less available)
   const topResults = scored.slice(0, 3);
+  
+  if (canSwap) {
+    const bestNormal = scored[0];
+    const sortedBySwapped = [...scored].sort((a, b) => b.swappedScore - a.swappedScore);
+    const bestSwapped = sortedBySwapped.find(s => s.combo !== bestNormal.combo);
+    
+    if (bestSwapped) {
+      const label1 = OPTIMIZER_CRITERIA.find(c => c.id === enabledPrios[0].id)?.label;
+      const label2 = OPTIMIZER_CRITERIA.find(c => c.id === enabledPrios[1].id)?.label;
+      const variantEntry = {
+        ...bestSwapped,
+        isSwappedVariant: true,
+        swappedLabels: [label2, label1]
+      };
+      
+      // Insert as the 2nd variant
+      topResults.splice(1, 0, variantEntry);
+      if (topResults.length > 4) topResults.length = 4;
+    }
+  }
 
   return {
     best: scored[0],
