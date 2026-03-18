@@ -1101,7 +1101,413 @@ function showToast(msg, type = "success") {
 }
 
 // ═══════════════════════════════
+//   OPTIMIZER
+// ═══════════════════════════════
+
+const OPTIMIZER_CRITERIA = [
+  { id: 'freeDays',     label: 'Meiste freie Tage',        icon: '📅', desc: 'Tage ohne VL (HÜ/GÜ zählen als frei)' },
+  { id: 'leastGaps',    label: 'Wenigste Leerzeit',         icon: '⏱️', desc: 'Lücken zwischen Veranstaltungen minimieren' },
+  { id: 'latestStart',  label: 'Spätester Tagesbeginn',     icon: '🌅', desc: 'Möglichst spät am Tag beginnen' },
+  { id: 'earliestEnd',  label: 'Frühestes Tagesende',       icon: '🌙', desc: 'Möglichst früh am Tag fertig sein' },
+];
+
+let optimizerPriorities = OPTIMIZER_CRITERIA.map(c => c.id);
+let optimizerResult = null;
+
+function loadOptimizerPriorities() {
+  try {
+    const raw = localStorage.getItem('stundenplaner_optprio');
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length === 4) optimizerPriorities = arr;
+    }
+  } catch(e) {}
+}
+function saveOptimizerPriorities() {
+  localStorage.setItem('stundenplaner_optprio', JSON.stringify(optimizerPriorities));
+}
+
+// Check if a group name indicates HÜ/GÜ (optional attendance)
+function isOptionalLv(name) {
+  if (!name) return false;
+  const n = name.toLowerCase();
+  return n.includes('hü') || n.includes('gü') ||
+         n.includes('hörsaalübung') || n.includes('gruppenübung') ||
+         n.includes('hoersaaluebung') || n.includes('gruppenuebung') ||
+         /\bhu\b/.test(n) || /\bgu\b/.test(n);
+}
+
+// Collect all parallel LVs that need a choice
+function getParallelChoices() {
+  const choices = [];
+  for (const mod of modules) {
+    for (const lv of mod.lvs) {
+      if (lv.type !== 'parallel' || lv.groups.length === 0) continue;
+      // Filter out groups blocked by static LVs
+      const validGroups = lv.groups.filter(g => !isBlockedByStatic(g));
+      if (validGroups.length === 0) continue;
+      choices.push({
+        modId: mod.id,
+        modName: mod.name,
+        lvId: lv.id,
+        lvName: lv.name,
+        groups: validGroups,
+      });
+    }
+  }
+  return choices;
+}
+
+// Cartesian product with early conflict pruning
+function generateCombinations(choices) {
+  if (choices.length === 0) return [[]];
+  const results = [];
+  const maxCombos = 50000; // safety limit
+
+  function recurse(idx, current) {
+    if (results.length >= maxCombos) return;
+    if (idx === choices.length) {
+      results.push([...current]);
+      return;
+    }
+    for (const group of choices[idx].groups) {
+      // Check if this group conflicts with already-chosen groups
+      let hasConflict = false;
+      for (const chosen of current) {
+        if (chosen.day !== group.day) continue;
+        const s1 = timeToMins(chosen.startTime), e1 = timeToMins(chosen.endTime);
+        const s2 = timeToMins(group.startTime), e2 = timeToMins(group.endTime);
+        if (s1 < e2 && s2 < e1) { hasConflict = true; break; }
+      }
+      if (hasConflict) continue;
+      current.push(group);
+      recurse(idx + 1, current);
+      current.pop();
+    }
+  }
+  recurse(0, []);
+  return results;
+}
+
+// Collect all fixed events (static LVs) that always appear
+function getStaticEvents() {
+  const events = [];
+  for (const mod of modules) {
+    for (const lv of mod.lvs) {
+      if (lv.type !== 'static') continue;
+      events.push({
+        day: lv.day,
+        startTime: lv.startTime,
+        endTime: lv.endTime,
+        name: lv.name,
+        modName: mod.name,
+      });
+    }
+  }
+  return events;
+}
+
+function scoreCombination(combo) {
+  const staticEvents = getStaticEvents();
+  // Build per-day schedule: static + combo
+  const daySchedule = {};
+  DAYS.forEach(d => daySchedule[d] = []);
+
+  // Add static events
+  for (const ev of staticEvents) {
+    daySchedule[ev.day].push({
+      start: timeToMins(ev.startTime),
+      end: timeToMins(ev.endTime),
+      name: ev.name,
+      modName: ev.modName,
+    });
+  }
+  // Add combo selections
+  for (const g of combo) {
+    daySchedule[g.day].push({
+      start: timeToMins(g.startTime),
+      end: timeToMins(g.endTime),
+      name: g.name,
+      modName: '',
+    });
+  }
+
+  // Sort each day by start
+  for (const d of DAYS) {
+    daySchedule[d].sort((a, b) => a.start - b.start);
+  }
+
+  // 1) Free days: a day is free if it has 0 mandatory events (HÜ/GÜ don't count)
+  let freeDays = 0;
+  for (const d of DAYS) {
+    const mandatory = daySchedule[d].filter(ev => !isOptionalLv(ev.name));
+    if (mandatory.length === 0) freeDays++;
+  }
+
+  // 2) Wasted time (total gaps between consecutive events per day)
+  let totalGaps = 0;
+  for (const d of DAYS) {
+    const evts = daySchedule[d];
+    if (evts.length < 2) continue;
+    for (let i = 1; i < evts.length; i++) {
+      const gap = evts[i].start - evts[i-1].end;
+      if (gap > 0) totalGaps += gap;
+    }
+  }
+
+  // 3) Latest start: sum of first-event start times (higher = later = better)
+  let startSum = 0;
+  let activeDays = 0;
+  for (const d of DAYS) {
+    if (daySchedule[d].length === 0) continue;
+    startSum += daySchedule[d][0].start;
+    activeDays++;
+  }
+  const avgStart = activeDays > 0 ? startSum / activeDays : 24 * 60;
+
+  // 4) Earliest end: sum of last-event end times (lower = earlier = better)
+  let endSum = 0;
+  let endDays = 0;
+  for (const d of DAYS) {
+    if (daySchedule[d].length === 0) continue;
+    endSum += daySchedule[d][daySchedule[d].length - 1].end;
+    endDays++;
+  }
+  const avgEnd = endDays > 0 ? endSum / endDays : 0;
+
+  return {
+    freeDays,
+    totalGaps,
+    avgStart,
+    avgEnd,
+    daySchedule,
+  };
+}
+
+// Compare two scores based on priority order. Returns <0 if a is better.
+function compareScores(a, b, priorities) {
+  for (const crit of priorities) {
+    let diff;
+    switch (crit) {
+      case 'freeDays':    diff = b.freeDays - a.freeDays; break;        // more is better
+      case 'leastGaps':   diff = a.totalGaps - b.totalGaps; break;      // less is better
+      case 'latestStart': diff = b.avgStart - a.avgStart; break;        // higher is better
+      case 'earliestEnd': diff = a.avgEnd - b.avgEnd; break;            // lower is better
+      default: diff = 0;
+    }
+    if (Math.abs(diff) > 0.01) return diff;
+  }
+  return 0;
+}
+
+function optimizePlan() {
+  const choices = getParallelChoices();
+  if (choices.length === 0) {
+    return { error: 'Keine Parallelgruppen zum Optimieren vorhanden.' };
+  }
+
+  const totalPossible = choices.reduce((acc, c) => acc * c.groups.length, 1);
+  const combos = generateCombinations(choices);
+
+  if (combos.length === 0) {
+    return { error: 'Keine konfliktfreien Kombinationen gefunden.' };
+  }
+
+  // Score all combos
+  const scored = combos.map(combo => ({
+    combo,
+    score: scoreCombination(combo),
+  }));
+
+  // Sort by priority
+  scored.sort((a, b) => compareScores(a.score, b.score, optimizerPriorities));
+
+  return {
+    best: scored[0],
+    totalCombinations: totalPossible,
+    validCombinations: combos.length,
+    choices,
+  };
+}
+
+function applyOptimalPlan(combo) {
+  // Clear all parallel selections first
+  for (const mod of modules) {
+    for (const lv of mod.lvs) {
+      if (lv.type !== 'parallel') continue;
+      for (const g of lv.groups) g.selected = false;
+    }
+  }
+  // Apply the winning combo
+  for (const g of combo) {
+    for (const mod of modules) {
+      for (const lv of mod.lvs) {
+        if (lv.type !== 'parallel') continue;
+        const match = lv.groups.find(pg => pg.id === g.id);
+        if (match) match.selected = true;
+      }
+    }
+  }
+  save();
+  render();
+}
+
+// ── Optimizer Modal Logic ──
+function openOptimizerModal() {
+  loadOptimizerPriorities();
+  optimizerResult = null;
+  renderPriorityList();
+  document.getElementById('optimizerResults').innerHTML = '';
+  document.getElementById('optimizerResults').style.display = 'none';
+  document.getElementById('btnApplyOptimal').style.display = 'none';
+  openModal('modalOptimize');
+}
+
+function renderPriorityList() {
+  const list = document.getElementById('priorityList');
+  list.innerHTML = '';
+  optimizerPriorities.forEach((critId, idx) => {
+    const crit = OPTIMIZER_CRITERIA.find(c => c.id === critId);
+    if (!crit) return;
+    const item = document.createElement('div');
+    item.className = 'priority-item';
+    item.draggable = true;
+    item.dataset.critId = critId;
+    item.innerHTML = `
+      <div class="priority-handle">⠿</div>
+      <div class="priority-rank">${idx + 1}</div>
+      <div class="priority-icon">${crit.icon}</div>
+      <div class="priority-info">
+        <div class="priority-label">${crit.label}</div>
+        <div class="priority-desc">${crit.desc}</div>
+      </div>
+    `;
+
+    // Drag events
+    item.addEventListener('dragstart', (e) => {
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', critId);
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      document.querySelectorAll('.priority-item.drag-over-above, .priority-item.drag-over-below')
+        .forEach(el => el.classList.remove('drag-over-above', 'drag-over-below'));
+    });
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      item.classList.toggle('drag-over-above', e.clientY < midY);
+      item.classList.toggle('drag-over-below', e.clientY >= midY);
+    });
+    item.addEventListener('dragleave', () => {
+      item.classList.remove('drag-over-above', 'drag-over-below');
+    });
+    item.addEventListener('drop', (e) => {
+      e.preventDefault();
+      item.classList.remove('drag-over-above', 'drag-over-below');
+      const draggedId = e.dataTransfer.getData('text/plain');
+      if (draggedId === critId) return;
+      const fromIdx = optimizerPriorities.indexOf(draggedId);
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      let toIdx = optimizerPriorities.indexOf(critId);
+      if (e.clientY >= midY) toIdx++;
+      // Remove from old position
+      optimizerPriorities.splice(fromIdx, 1);
+      // Adjust target if needed
+      if (fromIdx < toIdx) toIdx--;
+      optimizerPriorities.splice(toIdx, 0, draggedId);
+      saveOptimizerPriorities();
+      renderPriorityList();
+    });
+
+    list.appendChild(item);
+  });
+}
+
+function runOptimizer() {
+  const btn = document.getElementById('btnRunOptimizer');
+  btn.disabled = true;
+  btn.textContent = 'Berechne...';
+
+  // Use setTimeout to let UI update
+  setTimeout(() => {
+    const result = optimizePlan();
+    btn.disabled = false;
+    btn.textContent = 'Berechnen';
+
+    const resultsEl = document.getElementById('optimizerResults');
+    resultsEl.style.display = '';
+
+    if (result.error) {
+      resultsEl.innerHTML = `<div class="opt-error">${result.error}</div>`;
+      document.getElementById('btnApplyOptimal').style.display = 'none';
+      return;
+    }
+
+    optimizerResult = result;
+    const s = result.best.score;
+    const minsToTime = (m) => {
+      const h = Math.floor(m / 60);
+      const min = Math.round(m % 60);
+      return h + ':' + String(min).padStart(2, '0');
+    };
+
+    resultsEl.innerHTML = `
+      <div class="opt-stats-header">
+        <span class="opt-stats-badge">${result.validCombinations} von ${result.totalCombinations}</span>
+        konfliktfreie Kombinationen geprüft
+      </div>
+      <div class="opt-stats-grid">
+        <div class="opt-stat">
+          <div class="opt-stat-icon">📅</div>
+          <div class="opt-stat-value">${s.freeDays}</div>
+          <div class="opt-stat-label">Freie Tage</div>
+        </div>
+        <div class="opt-stat">
+          <div class="opt-stat-icon">⏱️</div>
+          <div class="opt-stat-value">${s.totalGaps} min</div>
+          <div class="opt-stat-label">Leerzeit</div>
+        </div>
+        <div class="opt-stat">
+          <div class="opt-stat-icon">🌅</div>
+          <div class="opt-stat-value">${minsToTime(s.avgStart)}</div>
+          <div class="opt-stat-label">⌀ Beginn</div>
+        </div>
+        <div class="opt-stat">
+          <div class="opt-stat-icon">🌙</div>
+          <div class="opt-stat-value">${minsToTime(s.avgEnd)}</div>
+          <div class="opt-stat-label">⌀ Ende</div>
+        </div>
+      </div>
+      <div class="opt-selection-title">Ausgewählte Gruppen:</div>
+      <div class="opt-selection-list">
+        ${result.best.combo.map(g => `
+          <div class="opt-selection-item">
+            <span class="pg-day-badge">${g.day}</span>
+            <span>${g.name}</span>
+            <span class="opt-selection-time">${g.startTime}–${g.endTime}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    document.getElementById('btnApplyOptimal').style.display = '';
+  }, 50);
+}
+
+function applyOptimizerResult() {
+  if (!optimizerResult || !optimizerResult.best) return;
+  applyOptimalPlan(optimizerResult.best.combo);
+  closeModal('modalOptimize');
+  showToast('Optimaler Stundenplan angewendet ✓', 'success');
+}
+
+// ═══════════════════════════════
 //   INIT
 // ═══════════════════════════════
+loadOptimizerPriorities();
 load();
 render();
