@@ -55,12 +55,20 @@
     <div class="sidebar">
       <div class="sidebar-header">
         <h2>Module</h2>
-        <button class="btn" id="btnAddModule" onclick="openAddModuleModal()">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-          Hinzufügen
-        </button>
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="btn sidebar-toggle-btn" onclick="expandAllModules()" title="Alle aufklappen" style="padding:4px 6px;font-size:11px">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="btn sidebar-toggle-btn" onclick="collapseAllModules()" title="Alle zuklappen" style="padding:4px 6px;font-size:11px">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 6l3-3 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="btn" id="btnAddModule" onclick="openAddModuleModal()">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            Hinzufügen
+          </button>
+        </div>
       </div>
       <div class="sidebar-body" id="sidebarBody">
         <div class="empty-state" id="sidebarEmpty"

@@ -930,3 +930,62 @@ header {
   font-size: 11px;
   color: var(--text2);
 }
+
+/* Optimizer result navigation */
+.opt-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.opt-nav-btn {
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+}
+.opt-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.opt-nav-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  font-family: var(--mono);
+}
+
+/* Dropzone file type indicators */
+.dropzone.drag-json {
+  border-color: var(--accent);
+  background: rgba(124, 106, 247, 0.12);
+}
+.dropzone.drag-json .dropzone-text::after {
+  content: ' (JSON)';
+  color: var(--accent);
+  font-weight: 600;
+}
+.dropzone.drag-xhtml {
+  border-color: var(--accent3);
+  background: rgba(52, 211, 153, 0.08);
+}
+.dropzone.drag-xhtml .dropzone-text::after {
+  content: ' (XHTML)';
+  color: var(--accent3);
+  font-weight: 600;
+}
+
+/* Sidebar toggle buttons */
+.sidebar-toggle-btn {
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text3);
+}
+.sidebar-toggle-btn:hover {
+  color: var(--text);
+  border-color: var(--text3);
+}
+
+/* Color mode label */
+.color-mode-btns {
+  font-size: 11px;
+}

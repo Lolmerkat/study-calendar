@@ -81,6 +81,7 @@ function setColorMode(mode) {
   colorMode = mode;
   document.getElementById('colorModeModule').classList.toggle('active', mode === 'module');
   document.getElementById('colorModeType').classList.toggle('active', mode === 'type');
+  save();
   renderCalendar();
 }
 
@@ -121,7 +122,7 @@ function save() {
   try {
     localStorage.setItem(
       "stundenplaner_v2",
-      JSON.stringify({ modules, colorIdx }),
+      JSON.stringify({ modules, colorIdx, filter, colorMode }),
     );
   } catch (e) {}
 }
@@ -132,6 +133,8 @@ function load() {
       const d = JSON.parse(raw);
       modules = d.modules || [];
       colorIdx = d.colorIdx || 0;
+      if (d.filter) filter = d.filter;
+      if (d.colorMode) colorMode = d.colorMode;
     }
   } catch (e) {}
 }
@@ -249,6 +252,24 @@ function toggleModule(id) {
   const toggle = document.getElementById("toggle-" + id);
   const open = body.classList.toggle("open");
   toggle.classList.toggle("open", open);
+}
+
+function expandAllModules() {
+  modules.forEach(mod => {
+    const body = document.getElementById('body-' + mod.id);
+    const toggle = document.getElementById('toggle-' + mod.id);
+    if (body) body.classList.add('open');
+    if (toggle) toggle.classList.add('open');
+  });
+}
+
+function collapseAllModules() {
+  modules.forEach(mod => {
+    const body = document.getElementById('body-' + mod.id);
+    const toggle = document.getElementById('toggle-' + mod.id);
+    if (body) body.classList.remove('open');
+    if (toggle) toggle.classList.remove('open');
+  });
 }
 
 // ═══════════════════════════════
@@ -551,6 +572,7 @@ function setFilter(f) {
   document
     .getElementById("filterSelected")
     .classList.toggle("active", f === "selected");
+  save();
   renderCalendar();
 }
 
@@ -983,14 +1005,23 @@ function handleFileUpload(event) {
 
 function onDragOver(e) {
   e.preventDefault();
-  document.getElementById("dropzone").classList.add("drag-over");
+  const dz = document.getElementById("dropzone");
+  dz.classList.add("drag-over");
+  // Try to detect file type from drag data
+  const items = e.dataTransfer?.items;
+  if (items && items.length > 0) {
+    const name = items[0].type || '';
+    dz.classList.toggle('drag-json', name.includes('json'));
+    dz.classList.toggle('drag-xhtml', !name.includes('json'));
+  }
 }
 function onDragLeave(e) {
-  document.getElementById("dropzone").classList.remove("drag-over");
+  const dz = document.getElementById("dropzone");
+  dz.classList.remove("drag-over", "drag-json", "drag-xhtml");
 }
 function onDrop(e) {
   e.preventDefault();
-  document.getElementById("dropzone").classList.remove("drag-over");
+  document.getElementById("dropzone").classList.remove("drag-over", "drag-json", "drag-xhtml");
   const file = e.dataTransfer.files[0];
   if (file) readFile(file);
 }
@@ -1135,12 +1166,31 @@ function openModal(id) {
 function closeModal(id) {
   document.getElementById(id).classList.remove("open");
 }
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+}
 
 // Close modal on overlay click
 document.querySelectorAll(".modal-overlay").forEach((overlay) => {
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) overlay.classList.remove("open");
   });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  // Esc closes any open modal
+  if (e.key === 'Escape') {
+    closeAllModals();
+    return;
+  }
+  // Don't trigger shortcuts when typing in inputs
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  // Ctrl+O opens optimizer
+  if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+    e.preventDefault();
+    openOptimizerModal();
+  }
 });
 
 // ═══════════════════════════════
@@ -1377,8 +1427,12 @@ function optimizePlan() {
   // Sort by priority
   scored.sort((a, b) => compareScores(a.score, b.score, optimizerPriorities));
 
+  // Return top 3 (or fewer if less available)
+  const topResults = scored.slice(0, 3);
+
   return {
     best: scored[0],
+    topResults,
     totalCombinations: totalPossible,
     validCombinations: combos.length,
     choices,
@@ -1504,58 +1558,87 @@ function runOptimizer() {
     }
 
     optimizerResult = result;
-    const s = result.best.score;
-    const minsToTime = (m) => {
-      const h = Math.floor(m / 60);
-      const min = Math.round(m % 60);
-      return h + ':' + String(min).padStart(2, '0');
-    };
-
-    resultsEl.innerHTML = `
-      <div class="opt-stats-header">
-        <span class="opt-stats-badge">${result.validCombinations} von ${result.totalCombinations}</span>
-        konfliktfreie Kombinationen geprüft
-      </div>
-      <div class="opt-stats-grid">
-        <div class="opt-stat">
-          <div class="opt-stat-icon">📅</div>
-          <div class="opt-stat-value">${s.freeDays}</div>
-          <div class="opt-stat-label">Freie Tage</div>
-        </div>
-        <div class="opt-stat">
-          <div class="opt-stat-icon">⏱️</div>
-          <div class="opt-stat-value">${s.totalGaps} min</div>
-          <div class="opt-stat-label">Leerzeit</div>
-        </div>
-        <div class="opt-stat">
-          <div class="opt-stat-icon">🌅</div>
-          <div class="opt-stat-value">${minsToTime(s.avgStart)}</div>
-          <div class="opt-stat-label">⌀ Beginn</div>
-        </div>
-        <div class="opt-stat">
-          <div class="opt-stat-icon">🌙</div>
-          <div class="opt-stat-value">${minsToTime(s.avgEnd)}</div>
-          <div class="opt-stat-label">⌀ Ende</div>
-        </div>
-      </div>
-      <div class="opt-selection-title">Ausgewählte Gruppen:</div>
-      <div class="opt-selection-list">
-        ${result.best.combo.map(g => `
-          <div class="opt-selection-item">
-            <span class="pg-day-badge">${g.day}</span>
-            <span>${g.name}</span>
-            <span class="opt-selection-time">${g.startTime}–${g.endTime}</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
+    optimizerResult.currentIdx = 0;
+    renderOptimizerResultCard(0);
     document.getElementById('btnApplyOptimal').style.display = '';
   }, 50);
 }
 
+function renderOptimizerResultCard(idx) {
+  const result = optimizerResult;
+  if (!result || !result.topResults) return;
+  const topCount = result.topResults.length;
+  const entry = result.topResults[idx];
+  const s = entry.score;
+  const minsToTime = (m) => {
+    const h = Math.floor(m / 60);
+    const min = Math.round(m % 60);
+    return h + ':' + String(min).padStart(2, '0');
+  };
+
+  const resultsEl = document.getElementById('optimizerResults');
+  resultsEl.innerHTML = `
+    <div class="opt-stats-header">
+      <span class="opt-stats-badge">${result.validCombinations} von ${result.totalCombinations}</span>
+      konfliktfreie Kombinationen geprüft
+    </div>
+    ${topCount > 1 ? `
+    <div class="opt-nav">
+      <button class="btn opt-nav-btn" onclick="navigateOptResult(-1)" ${idx === 0 ? 'disabled' : ''}>
+        ◀
+      </button>
+      <span class="opt-nav-label">Ergebnis ${idx + 1} von ${topCount}</span>
+      <button class="btn opt-nav-btn" onclick="navigateOptResult(1)" ${idx === topCount - 1 ? 'disabled' : ''}>
+        ▶
+      </button>
+    </div>` : ''}
+    <div class="opt-stats-grid">
+      <div class="opt-stat">
+        <div class="opt-stat-icon">📅</div>
+        <div class="opt-stat-value">${s.freeDays}</div>
+        <div class="opt-stat-label">Freie Tage</div>
+      </div>
+      <div class="opt-stat">
+        <div class="opt-stat-icon">⏱️</div>
+        <div class="opt-stat-value">${s.totalGaps} min</div>
+        <div class="opt-stat-label">Leerzeit</div>
+      </div>
+      <div class="opt-stat">
+        <div class="opt-stat-icon">🌅</div>
+        <div class="opt-stat-value">${minsToTime(s.avgStart)}</div>
+        <div class="opt-stat-label">⌀ Beginn</div>
+      </div>
+      <div class="opt-stat">
+        <div class="opt-stat-icon">🌙</div>
+        <div class="opt-stat-value">${minsToTime(s.avgEnd)}</div>
+        <div class="opt-stat-label">⌀ Ende</div>
+      </div>
+    </div>
+    <div class="opt-selection-title">Ausgewählte Gruppen:</div>
+    <div class="opt-selection-list">
+      ${entry.combo.map(g => `
+        <div class="opt-selection-item">
+          <span class="pg-day-badge">${g.day}</span>
+          <span>${g.name}</span>
+          <span class="opt-selection-time">${g.startTime}–${g.endTime}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function navigateOptResult(delta) {
+  if (!optimizerResult || !optimizerResult.topResults) return;
+  const newIdx = optimizerResult.currentIdx + delta;
+  if (newIdx < 0 || newIdx >= optimizerResult.topResults.length) return;
+  optimizerResult.currentIdx = newIdx;
+  renderOptimizerResultCard(newIdx);
+}
+
 function applyOptimizerResult() {
-  if (!optimizerResult || !optimizerResult.best) return;
-  applyOptimalPlan(optimizerResult.best.combo);
+  if (!optimizerResult || !optimizerResult.topResults) return;
+  const entry = optimizerResult.topResults[optimizerResult.currentIdx];
+  applyOptimalPlan(entry.combo);
   closeModal('modalOptimize');
   showToast('Optimaler Stundenplan angewendet ✓', 'success');
 }
@@ -1565,4 +1648,10 @@ function applyOptimizerResult() {
 // ═══════════════════════════════
 loadOptimizerPriorities();
 load();
+// Restore persisted UI state
+document.getElementById('filterAll').classList.toggle('active', filter === 'all');
+document.getElementById('filterAvailable').classList.toggle('active', filter === 'available');
+document.getElementById('filterSelected').classList.toggle('active', filter === 'selected');
+document.getElementById('colorModeModule').classList.toggle('active', colorMode === 'module');
+document.getElementById('colorModeType').classList.toggle('active', colorMode === 'type');
 render();
