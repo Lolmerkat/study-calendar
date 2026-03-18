@@ -933,9 +933,9 @@ function parseTime(raw) {
 }
 
 // ═══════════════════════════════
-//   XHTML UPLOAD / DROP
+//   FILE UPLOAD / DROP (XHTML + JSON)
 // ═══════════════════════════════
-function handleXhtmlUpload(event) {
+function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   event.target.value = "";
@@ -958,7 +958,23 @@ function onDrop(e) {
 
 function readFile(file) {
   const reader = new FileReader();
-  reader.onload = (e) => openImportModal(e.target.result, file.name);
+  reader.onload = (e) => {
+    const content = e.target.result;
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.json')) {
+      // JSON import — load as schedule data
+      try {
+        const data = JSON.parse(content);
+        if (!Array.isArray(data.modules)) throw new Error('Kein "modules"-Array gefunden');
+        _applyImportedData(data);
+      } catch (err) {
+        showToast('Fehler beim JSON-Import: ' + err.message, 'error');
+      }
+    } else {
+      // XHTML import — parse parallel groups
+      openImportModal(content, file.name);
+    }
+  };
   reader.readAsText(file, "UTF-8");
 }
 
