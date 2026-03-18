@@ -529,7 +529,7 @@ function clearAll() {
 // ═══════════════════════════════
 function openShareModal(tab) {
   switchShareTab(tab || "export");
-  if (!tab || tab === "export") {
+  if (tab === "export") {
     if (modules.length === 0) {
       showToast("Keine Daten zum Exportieren", "error");
       return;
