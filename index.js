@@ -1700,6 +1700,10 @@ function renderOptimizerResultCard(idx) {
         ▶
       </button>
     </div>` : ''}
+    ${entry.isSwappedVariant ? `
+    <div class="opt-variant-banner">
+      ✨ <strong>Alternative Form:</strong> Priorisiert <em>${entry.swappedLabels[0]}</em> gegenüber <em>${entry.swappedLabels[1]}</em>
+    </div>` : ''}
     <div class="opt-stats-grid">
       <div class="opt-stat">
         <div class="opt-stat-icon">📅</div>
