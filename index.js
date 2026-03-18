@@ -1216,7 +1216,7 @@ const OPTIMIZER_CRITERIA = [
   { id: 'earliestEnd',  label: 'Frühestes Tagesende',       icon: '🌙', desc: 'Möglichst früh am Tag fertig sein' },
 ];
 
-let optimizerPriorities = OPTIMIZER_CRITERIA.map(c => c.id);
+let optimizerPriorities = OPTIMIZER_CRITERIA.map(c => ({ id: c.id, enabled: true }));
 let optimizerResult = null;
 
 function loadOptimizerPriorities() {
@@ -1224,12 +1224,28 @@ function loadOptimizerPriorities() {
     const raw = localStorage.getItem('stundenplaner_optprio');
     if (raw) {
       const arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr.length === 4) optimizerPriorities = arr;
+      if (Array.isArray(arr) && arr.length === 4) {
+        if (typeof arr[0] === 'string') {
+          // migrate old data length
+          optimizerPriorities = arr.map(id => ({ id, enabled: true }));
+        } else {
+          optimizerPriorities = arr;
+        }
+      }
     }
   } catch(e) {}
 }
 function saveOptimizerPriorities() {
   localStorage.setItem('stundenplaner_optprio', JSON.stringify(optimizerPriorities));
+}
+
+function togglePriority(id) {
+  const p = optimizerPriorities.find(p => p.id === id);
+  if (p) {
+    p.enabled = !p.enabled;
+    saveOptimizerPriorities();
+    renderPriorityList();
+  }
 }
 
 // Check if a group name indicates HÜ/GÜ (optional attendance)
@@ -1249,7 +1265,7 @@ function getParallelChoices() {
     for (const lv of mod.lvs) {
       if (lv.type !== 'parallel' || lv.groups.length === 0) continue;
       // Filter out groups blocked by static LVs
-      const validGroups = lv.groups.filter(g => !isBlockedByStatic(g));
+      const validGroups = lv.groups.filter(g => !isBlockedByStatic(g)).map(g => ({...g, modName: mod.name}));
       if (validGroups.length === 0) continue;
       choices.push({
         modId: mod.id,
@@ -1333,7 +1349,7 @@ function scoreCombination(combo) {
       start: timeToMins(g.startTime),
       end: timeToMins(g.endTime),
       name: g.name,
-      modName: '',
+      modName: g.modName || '',
     });
   }
 
@@ -1342,10 +1358,28 @@ function scoreCombination(combo) {
     daySchedule[d].sort((a, b) => a.start - b.start);
   }
 
-  // 1) Free days: a day is free if it has 0 mandatory events (HÜ/GÜ don't count)
+  // Determine which modules happen on multiple days
+  const moduleDays = {};
+  for (const d of DAYS) {
+    const modsOnDay = new Set(daySchedule[d].filter(ev => ev.modName).map(ev => ev.modName));
+    for (const m of modsOnDay) {
+      moduleDays[m] = (moduleDays[m] || 0) + 1;
+    }
+  }
+
+  // 1) Free days: a day is free if it has 0 mandatory events
   let freeDays = 0;
   for (const d of DAYS) {
-    const mandatory = daySchedule[d].filter(ev => !isOptionalLv(ev.name));
+    const mandatory = daySchedule[d].filter(ev => {
+      // It is optional (HÜ/GÜ do not count)
+      if (isOptionalLv(ev.name)) return false;
+      // It is a short lecture (< 60 mins) shouldn't ruin a free day
+      if (ev.end - ev.start < 60) return false;
+      // It is a lecture for a module that meets on multiple days
+      if (ev.modName && moduleDays[ev.modName] > 1) return false;
+      
+      return true; // This event ruins the free day
+    });
     if (mandatory.length === 0) freeDays++;
   }
 
@@ -1475,11 +1509,12 @@ function openOptimizerModal() {
 function renderPriorityList() {
   const list = document.getElementById('priorityList');
   list.innerHTML = '';
-  optimizerPriorities.forEach((critId, idx) => {
+  optimizerPriorities.forEach((critObj, idx) => {
+    const critId = critObj.id;
     const crit = OPTIMIZER_CRITERIA.find(c => c.id === critId);
     if (!crit) return;
     const item = document.createElement('div');
-    item.className = 'priority-item';
+    item.className = 'priority-item' + (critObj.enabled ? '' : ' disabled');
     item.draggable = true;
     item.dataset.critId = critId;
     item.innerHTML = `
@@ -1489,6 +1524,12 @@ function renderPriorityList() {
       <div class="priority-info">
         <div class="priority-label">${crit.label}</div>
         <div class="priority-desc">${crit.desc}</div>
+      </div>
+      <div class="priority-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" ${critObj.enabled ? 'checked' : ''} onchange="togglePriority('${critId}')">
+          <span class="slider"></span>
+        </label>
       </div>
     `;
 
@@ -1519,16 +1560,16 @@ function renderPriorityList() {
       item.classList.remove('drag-over-above', 'drag-over-below');
       const draggedId = e.dataTransfer.getData('text/plain');
       if (draggedId === critId) return;
-      const fromIdx = optimizerPriorities.indexOf(draggedId);
+      const fromIdx = optimizerPriorities.findIndex(p => p.id === draggedId);
       const rect = item.getBoundingClientRect();
       const midY = rect.top + rect.height / 2;
-      let toIdx = optimizerPriorities.indexOf(critId);
+      let toIdx = optimizerPriorities.findIndex(p => p.id === critId);
       if (e.clientY >= midY) toIdx++;
       // Remove from old position
-      optimizerPriorities.splice(fromIdx, 1);
+      const draggedObj = optimizerPriorities.splice(fromIdx, 1)[0];
       // Adjust target if needed
       if (fromIdx < toIdx) toIdx--;
-      optimizerPriorities.splice(toIdx, 0, draggedId);
+      optimizerPriorities.splice(toIdx, 0, draggedObj);
       saveOptimizerPriorities();
       renderPriorityList();
     });
