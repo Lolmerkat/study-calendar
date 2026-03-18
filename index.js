@@ -1423,22 +1423,6 @@ function scoreCombination(combo) {
   };
 }
 
-// Compare two scores based on priority order. Returns <0 if a is better.
-function compareScores(a, b, priorities) {
-  for (const crit of priorities) {
-    let diff;
-    switch (crit) {
-      case 'freeDays':    diff = b.freeDays - a.freeDays; break;        // more is better
-      case 'leastGaps':   diff = a.totalGaps - b.totalGaps; break;      // less is better
-      case 'latestStart': diff = b.avgStart - a.avgStart; break;        // higher is better
-      case 'earliestEnd': diff = a.avgEnd - b.avgEnd; break;            // lower is better
-      default: diff = 0;
-    }
-    if (Math.abs(diff) > 0.01) return diff;
-  }
-  return 0;
-}
-
 function optimizePlan() {
   const choices = getParallelChoices();
   if (choices.length === 0) {
@@ -1458,8 +1442,49 @@ function optimizePlan() {
     score: scoreCombination(combo),
   }));
 
-  // Sort by priority
-  scored.sort((a, b) => compareScores(a.score, b.score, optimizerPriorities));
+  // Find min and max for normalization
+  let maxFreeDays = 0;
+  let maxGaps = 0;
+  let minStart = Infinity, maxStart = 0;
+  let minEnd = Infinity, maxEnd = 0;
+
+  for (const s of scored) {
+    if (s.score.freeDays > maxFreeDays) maxFreeDays = s.score.freeDays;
+    if (s.score.totalGaps > maxGaps) maxGaps = s.score.totalGaps;
+    if (s.score.avgStart < minStart) minStart = s.score.avgStart;
+    if (s.score.avgStart > maxStart) maxStart = s.score.avgStart;
+    if (s.score.avgEnd < minEnd) minEnd = s.score.avgEnd;
+    if (s.score.avgEnd > maxEnd) maxEnd = s.score.avgEnd;
+  }
+
+  // Calculate exponential weighted score
+  scored.forEach(s => {
+    let totalScore = 0;
+    optimizerPriorities.forEach((critObj, idx) => {
+      if (!critObj.enabled) return;
+      const weight = Math.pow(2, optimizerPriorities.length - idx); 
+      let norm = 0;
+      switch (critObj.id) {
+        case 'freeDays':
+          norm = maxFreeDays > 0 ? (s.score.freeDays / maxFreeDays) : 0;
+          break;
+        case 'leastGaps':
+          norm = maxGaps > 0 ? (1 - (s.score.totalGaps / maxGaps)) : 1;
+          break;
+        case 'latestStart':
+          norm = (maxStart > minStart) ? ((s.score.avgStart - minStart) / (maxStart - minStart)) : 1;
+          break;
+        case 'earliestEnd':
+          norm = (maxEnd > minEnd) ? (1 - ((s.score.avgEnd - minEnd) / (maxEnd - minEnd))) : 1;
+          break;
+      }
+      totalScore += norm * weight;
+    });
+    s.totalWeightedScore = totalScore;
+  });
+
+  // Sort by weighted score descending
+  scored.sort((a, b) => b.totalWeightedScore - a.totalWeightedScore);
 
   // Return top 3 (or fewer if less available)
   const topResults = scored.slice(0, 3);
