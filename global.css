@@ -788,6 +788,10 @@ header {
   opacity: 0.4;
   border-color: var(--accent);
 }
+.priority-item.disabled {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
 .priority-item.drag-over-above {
   border-top: 2px solid var(--accent);
   margin-top: -1px;
@@ -834,6 +838,52 @@ header {
   font-size: 11px;
   color: var(--text3);
   margin-top: 1px;
+}
+.priority-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+}
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border);
+  transition: 0.2s;
+  border-radius: 18px;
+}
+.toggle-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text2);
+  transition: 0.2s;
+  border-radius: 50%;
+}
+.toggle-switch input:checked + .slider {
+  background-color: var(--accent);
+}
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(14px);
+  background-color: #fff;
 }
 
 /* Optimizer Results */
