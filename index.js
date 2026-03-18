@@ -40,10 +40,49 @@ const DAY_MAP = {
 
 let modules = [];
 let filter = "all"; // 'all' | 'available' | 'selected'
+let colorMode = "module"; // 'module' | 'type'
 let colorIdx = 0;
 let pendingImport = null; // {groups: PG[]}
 let addingLvToModuleId = null;
 let tempLvForms = [];
+
+// Type-based color palette
+const TYPE_COLORS = {
+  vl:   '#60a5fa', // Vorlesung — blue
+  hü:   '#fbbf24', // Hörsaalübung — amber
+  gü:   '#34d399', // Gruppenübung — green
+  pr:   '#c084fc', // Praktikum — purple
+  se:   '#fb923c', // Seminar — orange
+  tu:   '#f472b6', // Tutorium — pink
+  other:'#9090a8', // Sonstiges — gray
+};
+
+function detectLvType(name) {
+  if (!name) return 'other';
+  const n = name.toLowerCase();
+  if (/\bvl\b|vorlesung/.test(n)) return 'vl';
+  if (/\bhü\b|hörsaalübung|hoersaaluebung/.test(n)) return 'hü';
+  if (/\bgü\b|\[gü\]|gruppenübung|gruppenuebung/.test(n)) return 'gü';
+  if (/\bpr\b|\[pr\]|praktikum|labor/.test(n)) return 'pr';
+  if (/\bse\b|seminar/.test(n)) return 'se';
+  if (/\btu\b|tutorium/.test(n)) return 'tu';
+  return 'other';
+}
+
+function getEventColor(mod, lvName, pgName) {
+  if (colorMode === 'module') return mod.color;
+  // type mode: detect from LV name first, fall back to group name
+  let t = detectLvType(lvName);
+  if (t === 'other' && pgName) t = detectLvType(pgName);
+  return TYPE_COLORS[t] || TYPE_COLORS.other;
+}
+
+function setColorMode(mode) {
+  colorMode = mode;
+  document.getElementById('colorModeModule').classList.toggle('active', mode === 'module');
+  document.getElementById('colorModeType').classList.toggle('active', mode === 'type');
+  renderCalendar();
+}
 
 function nextId() {
   return "_" + Math.random().toString(36).slice(2, 9);
@@ -305,7 +344,7 @@ function renderCalendar() {
           start: lv.startTime,
           end: lv.endTime,
           room: lv.room,
-          color: mod.color,
+          color: getEventColor(mod, lv.name, null),
           modId: mod.id,
           lvId: lv.id,
         });
@@ -324,7 +363,7 @@ function renderCalendar() {
             start: pg.startTime,
             end: pg.endTime,
             room: pg.room,
-            color: mod.color,
+            color: getEventColor(mod, lv.name, pg.name),
             selected: pg.selected,
             blocked,
             conflict: conflict.has,
