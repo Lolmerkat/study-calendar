@@ -1,0 +1,619 @@
+{
+  "modules": [
+    {
+      "id": "_q9wk601",
+      "name": "Mathematik II",
+      "color": "#7c6af7",
+      "lvs": [
+        {
+          "id": "_5ve3al7",
+          "name": "Vorlesung 1",
+          "type": "static",
+          "day": "Di",
+          "startTime": "11:30",
+          "endTime": "13:00",
+          "room": ""
+        },
+        {
+          "id": "_c5o97ds",
+          "name": "Vorlesung 2",
+          "type": "static",
+          "day": "Do",
+          "startTime": "11:30",
+          "endTime": "13:00",
+          "room": ""
+        },
+        {
+          "id": "_me9jn0u",
+          "name": "Hörsaalübung",
+          "type": "static",
+          "day": "Fr",
+          "startTime": "11:30",
+          "endTime": "13:00",
+          "room": ""
+        },
+        {
+          "id": "_u8irp2a",
+          "name": "Gruppenübung",
+          "type": "parallel",
+          "groups": [
+            {
+              "id": "_5ufz6o8",
+              "name": "Mathematik II [GÜ] für AIW - Parallelgruppe 1 (1. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "16:45",
+              "endTime": "18:15",
+              "room": "D - 0.010",
+              "selected": false
+            },
+            {
+              "id": "_40d0x0o",
+              "name": "Mathematik II [GÜ] für AIW - Parallelgruppe 2 (2. Parallelgruppe)",
+              "day": "Mi",
+              "startTime": "11:30",
+              "endTime": "13:00",
+              "room": "D - 0.010",
+              "selected": false
+            },
+            {
+              "id": "_5iscl6x",
+              "name": "Mathematik II [GÜ] für AIW - Parallelgruppe 3 (3. Parallelgruppe)",
+              "day": "Mi",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "A - 1.19",
+              "selected": false
+            },
+            {
+              "id": "_uxnli1e",
+              "name": "Mathematik II [GÜ] für BU - Parallelgruppe 1 (4. Parallelgruppe)",
+              "day": "Di",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "A - 1.16",
+              "selected": false
+            },
+            {
+              "id": "_77cmlnm",
+              "name": "Mathematik II [GÜ] für BU - Parallelgruppe 2 (5. Parallelgruppe)",
+              "day": "Di",
+              "startTime": "15:00",
+              "endTime": "16:30",
+              "room": "O - 0.007",
+              "selected": true
+            },
+            {
+              "id": "_i0u3n1m",
+              "name": "Mathematik II [GÜ] für BU - Parallelgruppe 3 (6. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "A - 0.19",
+              "selected": false
+            },
+            {
+              "id": "_2n0k4r3",
+              "name": "Mathematik II [GÜ] für BU - Parallelgruppe 4 (7. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "A - 0.10",
+              "selected": false
+            },
+            {
+              "id": "_mewhhkx",
+              "name": "Mathematik II [GÜ] für BVT und CB - Parallelgruppe 1 (8. Parallelgruppe)",
+              "day": "Mi",
+              "startTime": "11:30",
+              "endTime": "13:00",
+              "room": "D - 1.024",
+              "selected": false
+            },
+            {
+              "id": "_o8byjcq",
+              "name": "Mathematik II [GÜ] für ET - Parallelgruppe 1 (9. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "13:15",
+              "endTime": "14:45",
+              "room": "A - 1.27",
+              "selected": false
+            },
+            {
+              "id": "_ghtkoqr",
+              "name": "Mathematik II [GÜ] für GT und EUT - Parallelgruppe 1 (10. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "16:45",
+              "endTime": "18:15",
+              "room": "A - 1.20",
+              "selected": false
+            },
+            {
+              "id": "_hpru40d",
+              "name": "Mathematik II [GÜ] für GT und EUT - Parallelgruppe 2 (11. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "A - 2.34",
+              "selected": false
+            },
+            {
+              "id": "_4c5ug2o",
+              "name": "Mathematik II [GÜ] für IIW - Parallelgruppe 1 (12. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "13:15",
+              "endTime": "14:45",
+              "room": "A - 0.18",
+              "selected": false
+            },
+            {
+              "id": "_gydvlko",
+              "name": "Mathematik II [GÜ] für IIW - Parallelgruppe 2 (13. Parallelgruppe)",
+              "day": "Di",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "A - 3.35",
+              "selected": false
+            },
+            {
+              "id": "_nfbv2m0",
+              "name": "Mathematik II [GÜ] für MB - Parallelgruppe 1 (14. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "11:30",
+              "endTime": "13:00",
+              "room": "A - 0.01",
+              "selected": false
+            },
+            {
+              "id": "_mxmwrc3",
+              "name": "Mathematik II [GÜ] für MB - Parallelgruppe 2 (15. Parallelgruppe)",
+              "day": "Di",
+              "startTime": "16:45",
+              "endTime": "18:15",
+              "room": "D - 0.010",
+              "selected": false
+            },
+            {
+              "id": "_9gryz0b",
+              "name": "Mathematik II [GÜ] für MB - Parallelgruppe 3 (16. Parallelgruppe)",
+              "day": "Di",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "A - 2.34",
+              "selected": false
+            },
+            {
+              "id": "_iw2zbj3",
+              "name": "Mathematik II [GÜ] für MB - Parallelgruppe 4 (17. Parallelgruppe)",
+              "day": "Mi",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "A - 0.01",
+              "selected": false
+            },
+            {
+              "id": "_o8kcyzx",
+              "name": "Mathematik II [GÜ] für MEC - Parallelgruppe 1 (18. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "16:45",
+              "endTime": "18:15",
+              "room": "M - 3550",
+              "selected": false
+            },
+            {
+              "id": "_wd2gd2e",
+              "name": "Mathematik II [GÜ] für SB - Parallelgruppe 1 (19. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "13:15",
+              "endTime": "14:45",
+              "room": "A - 0.19",
+              "selected": false
+            },
+            {
+              "id": "_4wxrm95",
+              "name": "Mathematik II [GÜ] für VT und CB - Parallelgruppe 1 (20. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "A - 0.10",
+              "selected": false
+            },
+            {
+              "id": "_ggi2iqk",
+              "name": "Mathematik II [GÜ] für (WI)LUM - Parallelgruppe 1 (21. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "11:30",
+              "endTime": "13:00",
+              "room": "A - 3.35",
+              "selected": false
+            },
+            {
+              "id": "_os9wzk2",
+              "name": "Mathematik II [GÜ] für (WI)LUM -  Parallelgruppe 2 (22. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "A - 0.14",
+              "selected": false
+            },
+            {
+              "id": "_vappci0",
+              "name": "Mathematik II [GÜ] für (WI)LUM - Parallelgruppe 3 (23. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "15:00",
+              "endTime": "16:30",
+              "room": "D - 1.021",
+              "selected": false
+            },
+            {
+              "id": "_ts6tbm2",
+              "name": "Mathematik II [GÜ] für (WI)LUM -  Parallelgruppe 4 (24. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "M - 3550",
+              "selected": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "_ypmq9ii",
+      "name": "Programmierparadigmen",
+      "color": "#c084fc",
+      "lvs": [
+        {
+          "id": "_dktdlqz",
+          "name": "Vorlesung",
+          "type": "static",
+          "day": "Do",
+          "startTime": "08:00",
+          "endTime": "09:30",
+          "room": ""
+        },
+        {
+          "id": "_xz1fp58",
+          "name": "Hörsaalübung",
+          "type": "static",
+          "day": "Fr",
+          "startTime": "08:45",
+          "endTime": "09:30",
+          "room": ""
+        },
+        {
+          "id": "_21ycbab",
+          "name": "Praktikum",
+          "type": "parallel",
+          "groups": [
+            {
+              "id": "_lsnco2s",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 1 (1. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "H - 0.05",
+              "selected": false
+            },
+            {
+              "id": "_9i38i8d",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 2 (2. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "H - 0.09",
+              "selected": false
+            },
+            {
+              "id": "_lt072pm",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 3 (3. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "CIP/E - 2.058P2",
+              "selected": false
+            },
+            {
+              "id": "_5hwp848",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 4 (4. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "13:15",
+              "endTime": "14:45",
+              "room": "D - 1.025",
+              "selected": false
+            },
+            {
+              "id": "_c6ndql4",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 5 (5. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "D - 1.021",
+              "selected": false
+            },
+            {
+              "id": "_5njq4fi",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 6 (6. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "15:00",
+              "endTime": "16:30",
+              "room": "H - 0.07",
+              "selected": false
+            },
+            {
+              "id": "_2uquufe",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 7 (7. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "A - 0.01",
+              "selected": false
+            },
+            {
+              "id": "_uot3xvp",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 8 (8. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "CIP/E - 2.027P3d",
+              "selected": false
+            },
+            {
+              "id": "_8gcosa3",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 9 (9. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "L - 2019",
+              "selected": false
+            },
+            {
+              "id": "_1md16gj",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 10 (10. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "L - 2020",
+              "selected": false
+            },
+            {
+              "id": "_1nxsrl4",
+              "name": "Programmierparadigmen [PR] Parallelgruppe 11 (11. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "A - 2.39",
+              "selected": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "_obdw5hx",
+      "name": "Elektrotechnik II",
+      "color": "#34d399",
+      "lvs": [
+        {
+          "id": "_cbv50zc",
+          "name": "Vorlesung",
+          "type": "static",
+          "day": "Mo",
+          "startTime": "11:30",
+          "endTime": "12:15",
+          "room": ""
+        },
+        {
+          "id": "_4qqay8v",
+          "name": "Vorlesung",
+          "type": "static",
+          "day": "Di",
+          "startTime": "13:15",
+          "endTime": "14:45",
+          "room": ""
+        },
+        {
+          "id": "_8ertkcz",
+          "name": "Gruppenübung",
+          "type": "parallel",
+          "groups": [
+            {
+              "id": "_3r1k3fn",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 1 (1. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "A - 3.35",
+              "selected": false
+            },
+            {
+              "id": "_q3o8t9r",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 2 (2. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "13:15",
+              "endTime": "14:45",
+              "room": "A - 0.10",
+              "selected": false
+            },
+            {
+              "id": "_4hdadio",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 3 (3. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "15:00",
+              "endTime": "16:30",
+              "room": "H - 0.10",
+              "selected": false
+            },
+            {
+              "id": "_0de9eq9",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 4 (4. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "13:15",
+              "endTime": "14:45",
+              "room": "H - 0.07",
+              "selected": false
+            },
+            {
+              "id": "_2mtkkcx",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 5 (5. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "15:00",
+              "endTime": "16:30",
+              "room": "H - 0.06",
+              "selected": false
+            },
+            {
+              "id": "_ejaczhz",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 6 (6. Parallelgruppe)",
+              "day": "Mi",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "A - 1.16",
+              "selected": false
+            },
+            {
+              "id": "_pzmydbw",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 7 (7. Parallelgruppe)",
+              "day": "Mi",
+              "startTime": "11:30",
+              "endTime": "13:00",
+              "room": "H - 0.10",
+              "selected": false
+            },
+            {
+              "id": "_qfi3xwi",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 8 (8. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "16:45",
+              "endTime": "18:15",
+              "room": "H - 0.04",
+              "selected": false
+            },
+            {
+              "id": "_bp1qhud",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 9 (9. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "13:15",
+              "endTime": "14:45",
+              "room": "H - 0.10",
+              "selected": false
+            },
+            {
+              "id": "_movb9b2",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 10 (10. Parallelgruppe)",
+              "day": "Di",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "A - 0.10",
+              "selected": false
+            },
+            {
+              "id": "_5rz12sh",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 11 (11. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "A - 1.16",
+              "selected": false
+            },
+            {
+              "id": "_ffciuaa",
+              "name": "Elektrotechnik II: Wechselstromnetzwerke und grundlegende Bauelemente [GÜ] Parallelgruppe 12 (12. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "D - 1.024",
+              "selected": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "_70cdvub",
+      "name": "Automatentheorie",
+      "color": "#fbbf24",
+      "lvs": [
+        {
+          "id": "_385pd7j",
+          "name": "Vorlesung",
+          "type": "static",
+          "day": "Di",
+          "startTime": "15:00",
+          "endTime": "16:30",
+          "room": ""
+        },
+        {
+          "id": "_5c60h3c",
+          "name": "Vorlesung",
+          "type": "static",
+          "day": "Mi",
+          "startTime": "08:00",
+          "endTime": "09:30",
+          "room": ""
+        },
+        {
+          "id": "_mqaimda",
+          "name": "Gruppenübung",
+          "type": "parallel",
+          "groups": [
+            {
+              "id": "_ehkxo1l",
+              "name": "Automatentheorie und Formale Sprachen [GÜ] Parallelgruppe 1 (1. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "N - 0008",
+              "selected": false
+            },
+            {
+              "id": "_ihhqusz",
+              "name": "Automatentheorie und Formale Sprachen [GÜ] Parallelgruppe 2 (2. Parallelgruppe)",
+              "day": "Fr",
+              "startTime": "13:15",
+              "endTime": "14:45",
+              "room": "D - 2.022",
+              "selected": false
+            },
+            {
+              "id": "_ss5g183",
+              "name": "Automatentheorie und Formale Sprachen [GÜ] Parallelgruppe 3 (3. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "15:00",
+              "endTime": "16:30",
+              "room": "N - 0007",
+              "selected": false
+            },
+            {
+              "id": "_iapphp7",
+              "name": "Automatentheorie und Formale Sprachen [GÜ] Parallelgruppe 4 (4. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "room": "H - 0.07",
+              "selected": false
+            },
+            {
+              "id": "_d7xoy0r",
+              "name": "Automatentheorie und Formale Sprachen [GÜ] Parallelgruppe 5 (5. Parallelgruppe)",
+              "day": "Do",
+              "startTime": "15:00",
+              "endTime": "16:30",
+              "room": "D - 0.011",
+              "selected": false
+            },
+            {
+              "id": "_i2p69lz",
+              "name": "Automatentheorie und Formale Sprachen [GÜ] Parallelgruppe 6 (6. Parallelgruppe)",
+              "day": "Mo",
+              "startTime": "09:45",
+              "endTime": "11:15",
+              "room": "H - 0.09",
+              "selected": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "colorIdx": 4
+}
