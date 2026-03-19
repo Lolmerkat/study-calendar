@@ -410,6 +410,7 @@ header {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  position: relative;
 }
 
 /* ── VIEW CONTROLS ── */
@@ -791,6 +792,24 @@ header {
   background: linear-gradient(135deg, rgba(124, 106, 247, 0.28), rgba(192, 132, 252, 0.28));
   border-color: var(--accent2);
   color: #fff;
+}
+.floating-opt-btn {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  padding: 12px 18px;
+  border-radius: 24px;
+  font-size: 14px;
+}
+@media (max-width: 768px) {
+  .floating-opt-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
 }
 
 /* Priority List */
