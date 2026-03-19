@@ -135,3 +135,50 @@ function collapseAllModules() {
     if (toggle) toggle.classList.remove("open");
   });
 }
+
+/**
+ * Toggles the sidebar collapse state.
+ */
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const resizer = document.getElementById("sidebarResizer");
+  sidebar.classList.toggle("collapsed");
+  resizer.classList.toggle("collapsed");
+}
+
+/**
+ * Initializes the sidebar resizing logic.
+ */
+function initSidebarResizer() {
+  const resizer = document.getElementById("sidebarResizer");
+  const sidebar = document.getElementById("sidebar");
+  if (!resizer || !sidebar) return;
+  
+  let isResizing = false;
+
+  resizer.addEventListener("mousedown", (e) => {
+    isResizing = true;
+    sidebar.classList.add("is-resizing");
+    resizer.classList.add("is-resizing");
+    document.body.style.cursor = "col-resize";
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!isResizing) return;
+    const newWidth = e.clientX;
+    // We update the width directly; bounds are enforced by min-width/max-width in CSS
+    sidebar.style.width = `${newWidth}px`;
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (isResizing) {
+      isResizing = false;
+      sidebar.classList.remove("is-resizing");
+      resizer.classList.remove("is-resizing");
+      document.body.style.cursor = "";
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initSidebarResizer);
+

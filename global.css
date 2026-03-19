@@ -121,10 +121,32 @@ header {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: width 0.2s;
+  transition: width 0.2s, min-width 0.2s;
+}
+.sidebar.is-resizing {
+  transition: none;
+}
+.sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  border-right: none;
+}
+.sidebar-resizer {
+  width: 4px;
+  background: transparent;
+  cursor: col-resize;
+  z-index: 100;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.sidebar-resizer:hover, .sidebar-resizer.is-resizing {
+  background: var(--accent);
+}
+.sidebar-resizer.collapsed {
+  display: none;
 }
 .sidebar-header {
-  padding: 16px 20px 12px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;

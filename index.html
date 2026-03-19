@@ -52,7 +52,7 @@
   <div class="main-layout">
 
     <!-- SIDEBAR -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h2>Module</h2>
         <div style="display:flex;gap:4px;align-items:center">
@@ -89,10 +89,19 @@
         <input type="file" id="fileUpload" accept=".xhtml,.json" style="display:none" onchange="handleFileUpload(event)" />
       </div>
     </div>
+    
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
 
     <!-- CALENDAR AREA -->
     <div class="calendar-area">
       <div class="cal-toolbar">
+        <button class="btn" style="padding: 6px 10px; margin-right: 4px;" onclick="toggleSidebar()" title="Sidebar umschalten">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
         <div class="filter-btns">
           <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">Alle anzeigen</button>
           <button class="filter-btn" id="filterAvailable" onclick="setFilter('available')">Ohne Konflikte</button>
