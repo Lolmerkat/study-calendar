@@ -80,12 +80,15 @@
       </div>
       <!-- DROP ZONE for XHTML + JSON inside sidebar bottom -->
       <div class="add-section">
-        <div class="dropzone" id="dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)"
-          ondrop="onDrop(event)" onclick="document.getElementById('fileUpload').click()">
-          <div class="dropzone-icon">📄</div>
-          <div class="dropzone-text">XHTML / JSON hier ablegen</div>
-          <div class="dropzone-sub">XHTML aus HISinOne oder JSON-Export</div>
-        </div>
+        <button class="btn" id="dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)"
+          ondrop="onDrop(event)" onclick="document.getElementById('fileUpload').click()" style="width: 100%; justify-content: center; border-style: dashed; padding: 12px; font-weight: 500;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          XHTML / JSON importieren
+        </button>
         <input type="file" id="fileUpload" accept=".xhtml,.json" style="display:none" onchange="handleFileUpload(event)" />
       </div>
     </div>
@@ -102,11 +105,11 @@
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </button>
-        <div class="filter-btns">
-          <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">Alle anzeigen</button>
-          <button class="filter-btn" id="filterAvailable" onclick="setFilter('available')">Ohne Konflikte</button>
-          <button class="filter-btn" id="filterSelected" onclick="setFilter('selected')">Nur ausgewählte</button>
-        </div>
+        <select class="form-group-select" id="filterSelect" onchange="setFilter(this.value)" style="padding: 6px 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-weight: 500; outline: none; cursor: pointer;">
+          <option value="all">Alle anzeigen</option>
+          <option value="available">Ohne Konflikte</option>
+          <option value="selected">Nur ausgewählte</option>
+        </select>
         <button class="btn optimizer-btn" onclick="openOptimizerModal()">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.8 2.8l1.4 1.4M9.8 9.8l1.4 1.4M11.2 2.8l-1.4 1.4M4.2 9.8l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
@@ -114,10 +117,10 @@
           </svg>
           Optimieren
         </button>
-        <div class="filter-btns color-mode-btns">
-          <button class="filter-btn active" id="colorModeModule" onclick="setColorMode('module')">Modul</button>
-          <button class="filter-btn" id="colorModeType" onclick="setColorMode('type')">Typ</button>
-        </div>
+        <select class="form-group-select" id="colorModeSelect" onchange="setColorMode(this.value)" style="padding: 6px 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-weight: 500; outline: none; cursor: pointer;">
+          <option value="module">Farbe: Modul</option>
+          <option value="type">Farbe: Typ</option>
+        </select>
         <div class="cal-legend">
           <div class="legend-item">
             <div class="legend-dot" style="background:var(--accent3)"></div>

@@ -6,20 +6,7 @@
 loadOptimizerPriorities();
 load();
 
-document
-  .getElementById("filterAll")
-  .classList.toggle("active", filter === "all");
-document
-  .getElementById("filterAvailable")
-  .classList.toggle("active", filter === "available");
-document
-  .getElementById("filterSelected")
-  .classList.toggle("active", filter === "selected");
-document
-  .getElementById("colorModeModule")
-  .classList.toggle("active", colorMode === "module");
-document
-  .getElementById("colorModeType")
-  .classList.toggle("active", colorMode === "type");
+document.getElementById("filterSelect").value = filter;
+document.getElementById("colorModeSelect").value = colorMode;
 
 render();

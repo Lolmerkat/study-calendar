@@ -176,13 +176,7 @@ function renderCalendar() {
  */
 function setFilter(f) {
   filter = f;
-  document.getElementById("filterAll").classList.toggle("active", f === "all");
-  document
-    .getElementById("filterAvailable")
-    .classList.toggle("active", f === "available");
-  document
-    .getElementById("filterSelected")
-    .classList.toggle("active", f === "selected");
+  document.getElementById("filterSelect").value = f;
   save();
   renderCalendar();
 }
@@ -193,12 +187,7 @@ function setFilter(f) {
  */
 function setColorMode(mode) {
   colorMode = mode;
-  document
-    .getElementById("colorModeModule")
-    .classList.toggle("active", mode === "module");
-  document
-    .getElementById("colorModeType")
-    .classList.toggle("active", mode === "type");
+  document.getElementById("colorModeSelect").value = mode;
   save();
   renderCalendar();
 }
