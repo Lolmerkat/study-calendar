@@ -1093,3 +1093,80 @@ header {
 .color-mode-btns {
   font-size: 11px;
 }
+
+/* ── RESPONSIVE MOBILE LAYOUT ── */
+@media (max-width: 768px) {
+  .main-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    transition: height 0.3s ease;
+  }
+  .sidebar.collapsed {
+    height: 0 !important;
+    min-height: 0 !important;
+    border-bottom: none;
+    padding: 0;
+    overflow: hidden;
+    width: 100% !important;
+  }
+  .sidebar-resizer {
+    display: none !important;
+  }
+  
+  header {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  .header-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    flex-wrap: nowrap;
+  }
+  .header-actions::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .cal-toolbar {
+    padding: 8px 12px;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cal-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .cal-legend {
+    display: none; /* Hide legend on mobile to save space */
+  }
+  
+  .week-grid {
+    min-width: 500px;
+  }
+  
+  .modal {
+    width: 90vw;
+    padding: 16px;
+  }
+  
+  .toast {
+    max-width: 90vw;
+  }
+}
