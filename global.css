@@ -129,6 +129,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 .sidebar-header h2 {
   font-size: 12px;
@@ -145,6 +146,7 @@ header {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 0;
 }
 .sidebar-body::-webkit-scrollbar {
   width: 4px;
@@ -323,6 +325,7 @@ header {
 .add-section {
   padding: 12px;
   border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 .add-section h3 {
   font-size: 11px;
