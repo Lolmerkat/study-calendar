@@ -1149,6 +1149,13 @@ header {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+  .cal-toolbar > *, .header-actions > *, .sidebar-header > * {
+    flex-shrink: 0;
+  }
+  .sidebar-header {
+    flex-wrap: wrap;
+    height: auto;
+  }
   .cal-toolbar::-webkit-scrollbar {
     display: none;
   }

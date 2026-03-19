@@ -79,9 +79,15 @@
         </div>
       </div>
       <!-- DROP ZONE for XHTML + JSON inside sidebar bottom -->
-      <div class="add-section">
+      <div class="add-section" style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn" onclick="openAddModuleModal()" style="width: 100%; justify-content: center; font-weight: 500; padding: 10px;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="margin-right: 4px;">
+            <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          Manuell hinzufügen
+        </button>
         <button class="btn" id="dropzone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)"
-          ondrop="onDrop(event)" onclick="document.getElementById('fileUpload').click()" style="width: 100%; justify-content: center; border-style: dashed; padding: 12px; font-weight: 500;">
+          ondrop="onDrop(event)" onclick="document.getElementById('fileUpload').click()" style="width: 100%; justify-content: center; border-style: dashed; padding: 10px; font-weight: 500;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="17 8 12 3 7 8"></polyline>
