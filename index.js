@@ -654,6 +654,81 @@ function downloadShareJson() {
   showToast("Stundenplan exportiert ✓", "success");
 }
 
+function generateICalData() {
+  const dtStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  let ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//TheoFailenschmid//stundenplan//DE',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH'
+  ];
+
+  const anchorDate = new Date();
+  anchorDate.setDate(anchorDate.getDate() - (anchorDate.getDay() || 7) + 1);
+  anchorDate.setHours(0,0,0,0);
+
+  const dayOffsets = { 'Mo': 0, 'Di': 1, 'Mi': 2, 'Do': 3, 'Fr': 4 };
+
+  const addEvent = (name, day, start, end, room) => {
+    if (dayOffsets[day] === undefined) return;
+    
+    const eventDate = new Date(anchorDate);
+    eventDate.setDate(eventDate.getDate() + dayOffsets[day]);
+    const dateStr = eventDate.toISOString().split('T')[0].replace(/-/g, '');
+
+    const formatTime = (t) => t.replace(':', '') + '00';
+    
+    const dtStart = dateStr + 'T' + formatTime(start);
+    const dtEnd = dateStr + 'T' + formatTime(end);
+
+    ics.push(
+      'BEGIN:VEVENT',
+      `UID:${nextId()}@stundenplan.local`,
+      `DTSTAMP:${dtStamp}`,
+      `DTSTART:${dtStart}`,
+      `DTEND:${dtEnd}`,
+      `SUMMARY:${name}`,
+      `RRULE:FREQ=WEEKLY;COUNT=25`,
+      room ? `LOCATION:${room}` : '',
+      'END:VEVENT'
+    );
+  };
+
+  modules.forEach(mod => {
+    mod.lvs.forEach(lv => {
+      if (lv.type === 'static') {
+        addEvent(`${mod.name} (${lv.name})`, lv.day, lv.startTime, lv.endTime, lv.room);
+      } else {
+        lv.groups.forEach(pg => {
+          if (pg.selected) {
+            addEvent(`${mod.name} (${lv.name} - ${pg.name})`, pg.day, pg.startTime, pg.endTime, pg.room);
+          }
+        });
+      }
+    });
+  });
+
+  ics.push('END:VCALENDAR');
+  return ics.filter(Boolean).join('\r\n');
+}
+
+function downloadShareICal() {
+  if (modules.length === 0) {
+    showToast("Keine Daten zum Exportieren", "error");
+    return;
+  }
+  const icsData = generateICalData();
+  const blob = new Blob([icsData], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "stundenplan.ics";
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Stundenplan als iCal exportiert ✓", "success");
+}
+
 function validateShareJson() {
   const raw = document.getElementById("shareJsonInput").value.trim();
   const errEl = document.getElementById("shareJsonError");

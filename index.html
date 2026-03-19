@@ -226,6 +226,15 @@
         </div>
         <div class="modal-actions" style="margin-top:12px">
           <button class="btn" onclick="closeModal('modalShare')">Schließen</button>
+          <button class="btn primary" onclick="downloadShareICal()">
+            <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+              <path d="M6.5 9V1M3 5.5 6.5 9l3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M1 10.5v1a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-1" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round" />
+            </svg>
+            Als iCal (.ics)
+          </button>
           <button class="btn primary" onclick="downloadShareJson()">
             <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
               <path d="M6.5 9V1M3 5.5 6.5 9l3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
@@ -233,7 +242,7 @@
               <path d="M1 10.5v1a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-1" stroke="currentColor" stroke-width="1.6"
                 stroke-linecap="round" />
             </svg>
-            Als Datei herunterladen
+            Als JSON (.json)
           </button>
         </div>
       </div>
