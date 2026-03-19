@@ -9,21 +9,35 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
+  const triggerVisual = (keyId) => {
+    const el = document.querySelector(`span[data-key="${keyId}"]`);
+    if (el) {
+      el.classList.add('active-key');
+      setTimeout(() => el.classList.remove('active-key'), 150);
+    }
+  };
+
   // Ctrl / Cmd modifier keybinds
   if (e.ctrlKey || e.metaKey) {
     if (e.key === 's') {
       e.preventDefault();
+      triggerVisual('ctrl');
+      triggerVisual('s-export');
       openShareModal('export');
     }
   } else {
     // Single key keybinds
     if (e.key === 's') {
+      triggerVisual('s');
       toggleSidebar();
     } else if (e.key === 'o') {
+      triggerVisual('o');
       openOptimizerModal();
     } else if (e.key === 'l') {
+      triggerVisual('l');
       openShareModal('import');
     } else if (e.key === ',' || e.key === '.') {
+      triggerVisual(e.key);
       // Allow cycling through optimized variants when optimizer has completed
       if (typeof optimizerResult !== 'undefined' && optimizerResult && optimizerResult.topResults && optimizerResult.topResults.length > 1) {
         const delta = e.key === ',' ? -1 : 1;
