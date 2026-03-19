@@ -709,11 +709,9 @@ function generateICalData() {
         addEvent(`${mod.name} (${lv.name})`, lv.day, lv.startTime, lv.endTime, lv.room);
       } else {
         lv.groups.forEach(pg => {
-          const blocked = isBlockedByStatic(pg);
-          if (filter === "available" && blocked) return;
-          if (filter === "selected" && !pg.selected) return;
-          
-          addEvent(`${mod.name} (${lv.name} - ${pg.name})`, pg.day, pg.startTime, pg.endTime, pg.room);
+          if (pg.selected) {
+            addEvent(`${mod.name} (${lv.name} - ${pg.name})`, pg.day, pg.startTime, pg.endTime, pg.room);
+          }
         });
       }
     });
