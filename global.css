@@ -166,6 +166,7 @@ header {
   border-radius: var(--radius);
   overflow: hidden;
   transition: border-color 0.15s;
+  flex-shrink: 0;
 }
 .module-card:hover {
   border-color: var(--text3);
