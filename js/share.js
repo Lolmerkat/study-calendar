@@ -15,6 +15,13 @@ function openShareModal(tab) {
       2,
     );
     document.getElementById("shareCopyBtn").textContent = "Kopieren";
+    
+    // Check if web share is available for files
+    const canShare = navigator.canShare && navigator.canShare({ files: [new File([''], 'test.ics', {type: 'text/calendar'})] });
+    const shareBtn = document.getElementById("shareICalBtn");
+    if (shareBtn) {
+      shareBtn.style.display = canShare ? "" : "none";
+    }
   }
   openModal("modalShare");
 }
@@ -193,6 +200,36 @@ function downloadShareICal() {
   a.click();
   URL.revokeObjectURL(url);
   showToast("Stundenplan als iCal exportiert ✓", "success");
+}
+
+/**
+ * Shares the current schedule directly to calendar apps using the Web Share API.
+ */
+async function shareICal() {
+  if (modules.length === 0) {
+    showToast("Keine Daten zum Exportieren", "error");
+    return;
+  }
+  const icsData = generateICalData();
+  const file = new File([icsData], "stundenplan.ics", { type: "text/calendar" });
+  
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        title: 'Stundenplan',
+        files: [file]
+      });
+      showToast("Zum Kalender hinzugefügt ✓", "success");
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        console.error("Share failed", e);
+        showToast("Fehler beim Teilen. Lade stattdessen herunter...", "error");
+        downloadShareICal();
+      }
+    }
+  } else {
+    downloadShareICal();
+  }
 }
 
 /**
