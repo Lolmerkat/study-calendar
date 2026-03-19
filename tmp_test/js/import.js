@@ -292,16 +292,6 @@ function importDataFile(event) {
  * @param {Object} data - Imported data with a `modules` array
  */
 function _applyImportedData(data) {
-  // Data migration for imported JSON V1/V2 property 'lvs' -> 'vls'
-  if (Array.isArray(data.modules)) {
-    data.modules.forEach(m => {
-      if (m.lvs) {
-        m.vls = m.lvs;
-        delete m.lvs;
-      }
-    });
-  }
-
   const overwrite =
     modules.length === 0 ||
     confirm(

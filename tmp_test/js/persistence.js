@@ -21,13 +21,6 @@ function load() {
     if (raw) {
       const d = JSON.parse(raw);
       modules = d.modules || [];
-      // Data migration for old V1/V2 property 'lvs' -> 'vls'
-      modules.forEach(m => {
-        if (m.lvs) {
-          m.vls = m.lvs;
-          delete m.lvs;
-        }
-      });
       colorIdx = d.colorIdx || 0;
       if (d.filter) filter = d.filter;
       if (d.colorMode) colorMode = d.colorMode;
